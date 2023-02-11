@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:to_do_list/components/task.dart';
-import 'package:to_do_list/data/database.dart';
+import 'package:to_do_list/data/task_dao.dart';
 
 class FormScreen extends StatefulWidget {
-  
   const FormScreen({super.key});
 
   @override
@@ -14,7 +12,7 @@ class FormScreen extends StatefulWidget {
 class _FormScreenState extends State<FormScreen> {
   TextEditingController taskController = TextEditingController();
   TextEditingController imageController = TextEditingController();
-  double difficultyLevel= 1;
+  double difficultyLevel = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -37,10 +35,12 @@ class _FormScreenState extends State<FormScreen> {
               controller: taskController,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                icon: Icon(Icons.task, color: Colors.blue,),
+                icon: Icon(
+                  Icons.task,
+                  color: Colors.blue,
+                ),
                 labelText: 'Tarefa',
                 hintText: 'Nome',
-
               ),
             ),
             const SizedBox(
@@ -51,23 +51,26 @@ class _FormScreenState extends State<FormScreen> {
                 Row(
                   children: [
                     const Icon(Icons.perm_device_info_outlined, color: Colors.blue),
-                    const SizedBox(width: 12,),
+                    const SizedBox(
+                      width: 12,
+                    ),
                     RatingBar.builder(
                       minRating: 1,
                       itemPadding: const EdgeInsets.symmetric(horizontal: 8),
-                      itemBuilder: ((context, index) => const Icon(Icons.star, color: Colors.blueAccent,)),
+                      itemBuilder: ((context, index) => const Icon(
+                            Icons.star,
+                            color: Colors.blueAccent,
+                          )),
                       onRatingUpdate: (difficultyLevel) => setState(() {
                         this.difficultyLevel = difficultyLevel;
                       }),
                     ),
                   ],
-                ),            
+                ),
                 Text('Dificuldade: ${difficultyLevel.toInt()}'),
               ],
             ),
-            const SizedBox(
-              height: 30,
-            ),
+            const SizedBox(height: 30),
             TextFormField(
               controller: imageController,
               decoration: const InputDecoration(
@@ -78,18 +81,19 @@ class _FormScreenState extends State<FormScreen> {
             const SizedBox(
               height: 30,
             ),
-            ElevatedButton(onPressed: () {
-              CreatTableTask().save(Task(
-                taskController.text, 
-                imageController.text, 
-                difficultyLevel.toInt(),
-                ));
-                //print(taskController.text);
-                //print(imageController.text);
-                //print(difficultyLevel);
+            ElevatedButton(
+              onPressed: () async {
+                await TaskDao().save(
+                  taskController.text,
+                  imageController.text,
+                  difficultyLevel.toInt(),
+                );
                 Navigator.pop(context);
-            }, 
-            child: const Text('Salvar Tarefas')),
+              },
+              child: const Text(
+                'Salvar Tarefas',
+              ),
+            ),
           ],
         ),
       ),
