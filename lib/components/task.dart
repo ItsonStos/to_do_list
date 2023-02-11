@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:to_do_list/components/container.dart';
 import 'package:to_do_list/components/difficulty.dart';
+import 'package:to_do_list/data/database.dart';
 
 class Task extends StatefulWidget {
   final String name;
@@ -19,6 +20,13 @@ class _TaskState extends State<Task> {
     setState(() {
       nivel++;
     });
+  }
+
+  bool assetOrNetwork() {
+    if (widget.photo.contains('http')) {
+      return false;
+    }
+    return true;
   }
 
   @override
@@ -46,14 +54,19 @@ class _TaskState extends State<Task> {
                         borderRadius: BorderRadius.circular(4.5),
                         color: Colors.black12,
                       ),
+                      width: 72,
+                      height: 100,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(4),
-                        child: Image.asset(
-                          widget.photo,
-                          height: 100,
-                          width: 72,
-                          fit: BoxFit.cover,
-                        ),
+                        child: assetOrNetwork()
+                            ? Image.asset(
+                                widget.photo,
+                                fit: BoxFit.cover,
+                              )
+                            : Image.network(
+                                widget.photo,
+                                fit: BoxFit.cover,
+                              ),
                       ),
                     ),
                     Padding(
@@ -61,7 +74,6 @@ class _TaskState extends State<Task> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        // ignore: prefer_const_literals_to_create_immutables
                         children: [
                           SizedBox(
                             width: 200,
@@ -77,16 +89,19 @@ class _TaskState extends State<Task> {
                         ],
                       ),
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10.5),
-                        color: const Color.fromARGB(255, 5, 135, 242),
-                      ),
-                      height: 55,
-                      width: 60,
+                    SizedBox(
+                      height: 52,
+                      width: 52,
                       child: ElevatedButton(
-                        onPressed: levelUp,
-                        child: Column(
+                          onLongPress: () {
+                            CreatTableTask().delete(widget.name);
+                          },
+                          onPressed: () {
+                            setState(() {
+                              nivel++;
+                            });
+                          },
+                          child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           // ignore: prefer_const_literals_to_create_immutables
@@ -98,8 +113,8 @@ class _TaskState extends State<Task> {
                             ),
                           ],
                         ),
-                      ),
-                    ),
+                          ),
+                    ),                    
                   ],
                 ),
               ),
@@ -120,9 +135,9 @@ class _TaskState extends State<Task> {
                   Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Text(
-                      (nivel/widget.difficulty) <= 50 ?
-                      'Nivel: $nivel' :
-                      'Nivel Mestre',
+                      (nivel / widget.difficulty) <= 50
+                          ? 'Nivel: $nivel'
+                          : 'Nivel Mestre',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,

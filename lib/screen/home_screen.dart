@@ -1,41 +1,119 @@
 import 'package:flutter/material.dart';
 import 'package:to_do_list/components/task.dart';
+import 'package:to_do_list/data/database.dart';
+import 'package:to_do_list/screen/form_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  _openFormModal(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (contextNew) {
+          return const FormScreen();
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: const SizedBox(),
+        leading: const Icon(Icons.menu),
         title: const Text('Tarefas'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: IconButton(
+                onPressed: () => _openFormModal(context),
+                icon: const Icon(Icons.add)),
+          )
+        ],
       ),
-      body: ListView.builder(
-        itemCount: 1,
-        itemBuilder: ((context, index) {
-          return Column(
-            // ignore: prefer_const_literals_to_create_immutables
-            children: [
-              const Task('Estudar Flutter', 'assets/images/dash.png', 3),
-              const Task('Correr', 'assets/images/run.jpg', 1),
-              const Task('Trabalhar', 'assets/images/work.jpg', 5),
-              const Task('Jogar', 'assets/images/play.jpg', 1),
-              const Task('Andar de Bike', 'assets/images/bike.webp', 2),
-              const Task('Ler', 'assets/images/livro.jpg', 3),
-              const Task('Nadar', 'assets/images/nophoto.png', 4),
-              const SizedBox(
-                height: 63,
-              ),
-            ],
-          );
-        }),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: FutureBuilder<List<Task>>(
+            future: CreatTableTask().findAll(),
+            builder: (context, snapshot) {
+              List<Task>? items = snapshot.data;
+              switch (snapshot.connectionState) {
+                case ConnectionState.none:
+                  return Center(
+                    child: Column(
+                      children: const [
+                        CircularProgressIndicator(),
+                        Text('Carregando'),
+                      ],
+                    ),
+                  );
+                case ConnectionState.waiting:
+                  return Center(
+                    child: Column(
+                      children: const [
+                        CircularProgressIndicator(),
+                        Text('Carregando'),
+                      ],
+                    ),
+                  );
+                case ConnectionState.active:
+                  return Center(
+                    child: Column(
+                      children: const [
+                        CircularProgressIndicator(),
+                        Text('Carregando'),
+                      ],
+                    ),
+                  );
+                case ConnectionState.done:
+                  if (snapshot.hasData && items != null) {
+                    if (items.isNotEmpty) {
+                      return ListView.builder(
+                          itemCount: items.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final Task task = items[index];
+                            return task;
+                          });
+                    }
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: const [
+                          Icon(
+                            Icons.error_outline,
+                            size: 28,
+                          ),
+                          Text(
+                            'Não há nenhuma tarefa',
+                            style: TextStyle(fontSize: 32),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  return const Center(child: Text('Erro ao carregar tarefas!'));
+              }
+              //return const Text('Erro desconhecido!');
+            }),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        child: Container(height: 50),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: const Color.fromARGB(255, 155, 228, 250),
-        child: const Icon(Icons.add),
+        onPressed: () => _openFormModal(context),
+        elevation: 30,
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 30,
+        ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
